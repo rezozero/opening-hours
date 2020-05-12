@@ -1,0 +1,26 @@
+{
+    "name": "rezozero/opening-hours",
+    "license": "MIT",
+    "type": "library",
+    "description": "Lib for opening hours: return different format opening date from iso format",
+    "keywords": [
+        "opening-hours"
+    ],
+    "homepage": "https://github.com/TahinaMananjara/testProject",
+    "authors": [
+        {
+            "name": "Tahina Mananjara",
+            "email": "ratah56@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.0 || ^8.0",
+        "twig/twig": "1.* || 2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lib\\OpeningHours\\": "src/"
+        }
+    }
+}
