@@ -49,16 +49,18 @@ class OpeningHours
 
     public function buildData(array $data)
     {
-        if (is_array($data)) {
-            foreach ($data as $openingHourData) {
-                //var_dump($openingHourData);
-                $openingHourData = explode(" ", $openingHourData);
-                $days = $openingHourData[0]??"";
-                $times = $openingHourData[1]??"";
-                $this->associateDayHours($days, $times);
-            }
-            return $this;
+        if (!is_array($data)) {
+            throw new \Exception("OpeningHours data must be an array", 1);
         }
+
+        foreach ($data as $openingHourData) {
+            $openingHourData = explode(" ", $openingHourData);
+            $days = $openingHourData[0]??"";
+            $times = $openingHourData[1]??"";
+            $this->associateDayHours($days, $times);
+        }
+        return $this;
+
     }
 
     protected function associateDayHours ($days, $times)
@@ -159,6 +161,7 @@ class OpeningHours
         }
         return "";
     }
+
     protected function normalizeDayName(string $day)
     {
         $day = strtolower($day);
@@ -170,5 +173,10 @@ class OpeningHours
         $day = Lang::t($day, [], $this->locale);
 
         return $day;
+    }
+
+    public function checkOpeningDay(\DateTime $date)
+    {
+
     }
 }

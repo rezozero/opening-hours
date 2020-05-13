@@ -6,7 +6,7 @@
     "keywords": [
         "opening-hours"
     ],
-    "homepage": "https://github.com/TahinaMananjara/testProject",
+    "homepage": "https://github.com/rezozero/opening-hours",
     "authors": [
         {
             "name": "Tahina Mananjara",
@@ -22,5 +22,8 @@
         "psr-4": {
             "Lib\\OpeningHours\\": "src/"
         }
+    },
+    "require-dev": {
+        "atoum/atoum": "^3.4"
     }
 }
