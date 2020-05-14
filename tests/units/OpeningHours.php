@@ -124,4 +124,25 @@ class OpeningHours extends atoum
         ;
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function testCheckOpeningDay()
+    {
+        $this
+            // creation of a new instance of the class to test OpeningHours
+            ->given($openihours = OpeningHour::setData([
+                "Mo,Tu,We,Th 12:00-19:00",
+                "Sa ",
+                "Su "
+            ], 'fr'))
+            ->object($openihours)
+            ->isInstanceOf("Lib\OpeningHours\OpeningHours")
+            ->array($isOpening = $openihours->checkOpeningDay(new \DateTime()))
+            ->isNotEmpty()
+            ->boolean($isOpening['open'])
+            ->isTrue()
+        ;
+    }
+
 }

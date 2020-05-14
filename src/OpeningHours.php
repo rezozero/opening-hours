@@ -76,12 +76,12 @@ class OpeningHours
         $tempDay = [];
         if ($times) {
             foreach ($days as $day) {
-                $tempDay[] = $this->normalizeDayName($day) ." ". $times;
+                $tempDay[strtolower($day)] = $this->normalizeDayName($day) ." ". $times;
             }
             $this->openingDay = array_merge($this->openingDay, $tempDay);
         } else {
             foreach ($days as $day) {
-                $tempDay[] = $this->normalizeDayName($day) . " -";
+                $tempDay[strtolower($day)] = $this->normalizeDayName($day);
             }
             $this->closingDay = array_merge($this->closingDay, $tempDay);
         }
@@ -175,8 +175,33 @@ class OpeningHours
         return $day;
     }
 
+    /**
+     * @param \DateTime $date
+     * @return array
+     */
     public function checkOpeningDay(\DateTime $date)
     {
 
+        return $this->dataOpeningOneDay($date);
+    }
+
+    /**
+     * @param $date
+     * @return array
+     */
+    protected function dataOpeningOneDay ($date)
+    {
+        $allDay = $this->getAllDay();
+        $day = $date->format('D');
+
+        $findDay = $allDay[strtolower(substr($day,0,2))]??false;
+        if ($findDay) {
+            $foundDay = explode(" ", $findDay);
+            if (isset($foundDay[1])) {
+                return ["open" => true, "hour"=> $foundDay[1]];
+            }
+        }
+
+        return ['open' => false];
     }
 }
