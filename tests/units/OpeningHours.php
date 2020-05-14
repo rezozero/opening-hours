@@ -151,8 +151,9 @@ EOT
         $this
             // creation of a new instance of the class to test OpeningHours
             ->given($openingHours = new BaseOpeningHours([
-                'Mo,Tu,We,Th 12:00-19:00',
-                // Friday is not used, so we do not display it in combined mode
+                // Monday is closed and not mentioned
+                'Tu,We,Th 12:00-19:00',
+                // Friday is not mentioned, but we display it in combined mode
                 'Sa', // Saturday is added but without any hours so we display it but closed
                 'Su 10:00-12:30,14:00-18:00'
             ]))
@@ -164,9 +165,12 @@ EOT
                 'locale' => 'fr'
             ]))
             ->isNotEmpty()
+            // Monday is closed like friday and saturday, but some days are opened between them
+            // so we split them even if combinedDays is set to TRUE
             ->isEqualTo(trim(<<<EOT
-<span class="oh-group"><span class="oh-days">lundi, mardi, mercredi, jeudi</span> <span class="oh-hours">12h - 19h</span></span>
-<span class="oh-group"><span class="oh-days">samedi</span> <span class="oh-status">fermé</span></span>
+<span class="oh-group"><span class="oh-days">lundi</span> <span class="oh-status">fermé</span></span>
+<span class="oh-group"><span class="oh-days">mardi, mercredi, jeudi</span> <span class="oh-hours">12h - 19h</span></span>
+<span class="oh-group"><span class="oh-days">vendredi, samedi</span> <span class="oh-status">fermé</span></span>
 <span class="oh-group"><span class="oh-days">dimanche</span> <span class="oh-hours">10h - 12h30, 14h - 18h</span></span>
 EOT
             ))
@@ -178,8 +182,9 @@ EOT
             ]))
             ->isNotEmpty()
             ->isEqualTo(trim(<<<EOT
-<span class="oh-group"><span class="oh-days">Lundi, Mardi, Mercredi, Jeudi</span> <span class="oh-hours">12h - 19h</span></span>
-<span class="oh-group"><span class="oh-days">Samedi</span> <span class="oh-status">Fermé</span></span>
+<span class="oh-group"><span class="oh-days">Lundi</span> <span class="oh-status">Fermé</span></span>
+<span class="oh-group"><span class="oh-days">Mardi, Mercredi, Jeudi</span> <span class="oh-hours">12h - 19h</span></span>
+<span class="oh-group"><span class="oh-days">Vendredi, Samedi</span> <span class="oh-status">Fermé</span></span>
 <span class="oh-group"><span class="oh-days">Dimanche</span> <span class="oh-hours">10h - 12h30, 14h - 18h</span></span>
 EOT
             ))
@@ -191,8 +196,9 @@ EOT
             ]))
             ->isNotEmpty()
             ->isEqualTo(trim(<<<EOT
-<span class="oh-group"><span class="oh-days">Monday, Tuesday, Wednesday, Thursday</span> <span class="oh-hours">12PM - 7PM</span></span>
-<span class="oh-group"><span class="oh-days">Saturday</span> <span class="oh-status">Closed</span></span>
+<span class="oh-group"><span class="oh-days">Monday</span> <span class="oh-status">Closed</span></span>
+<span class="oh-group"><span class="oh-days">Tuesday, Wednesday, Thursday</span> <span class="oh-hours">12PM - 7PM</span></span>
+<span class="oh-group"><span class="oh-days">Friday, Saturday</span> <span class="oh-status">Closed</span></span>
 <span class="oh-group"><span class="oh-days">Sunday</span> <span class="oh-hours">10AM - 12:30PM, 2PM - 6PM</span></span>
 EOT
             ))
