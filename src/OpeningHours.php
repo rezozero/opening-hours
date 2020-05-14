@@ -18,13 +18,13 @@ class OpeningHours
     public function __construct($locale)
     {
         $this->locale = $locale;
-
     }
 
     /**
      * @param string[][] $data
      * @param string $locale
      * @return static
+     * @throws \Exception
      */
     public static function setData(array $data, $locale = 'en'): self
     {
