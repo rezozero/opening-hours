@@ -124,6 +124,22 @@ EOT
 <span class="oh-group"><span class="oh-days">Sunday</span> <span class="oh-hours">10AM - 12:30PM, 2PM - 6PM</span></span>
 EOT
             ))
+            ->string($openingHours->getAllDaysAsHtml([
+                'combinedDays' => false,
+                'capitalize' => true, // English days are always capitalized but we capitalize "closed"
+                'locale' => 'en'
+            ]))
+            ->isNotEmpty()
+            ->isEqualTo(trim(<<<EOT
+<span class="oh-group"><span class="oh-days">Monday</span> <span class="oh-hours">12PM - 7PM</span></span>
+<span class="oh-group"><span class="oh-days">Tuesday</span> <span class="oh-hours">12PM - 7PM</span></span>
+<span class="oh-group"><span class="oh-days">Wednesday</span> <span class="oh-hours">12PM - 7PM</span></span>
+<span class="oh-group"><span class="oh-days">Thursday</span> <span class="oh-hours">12PM - 7PM</span></span>
+<span class="oh-group"><span class="oh-days">Friday</span> <span class="oh-status">Closed</span></span>
+<span class="oh-group"><span class="oh-days">Saturday</span> <span class="oh-status">Closed</span></span>
+<span class="oh-group"><span class="oh-days">Sunday</span> <span class="oh-hours">10AM - 12:30PM, 2PM - 6PM</span></span>
+EOT
+            ))
         ;
     }
 
