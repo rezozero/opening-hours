@@ -5,13 +5,13 @@ namespace Lib\OpeningHours;
 
 class Day
 {
-    const MONDAY = 'mo';
-    const TUESDAY = 'tu';
-    const WEDNESDAY = 'we';
-    const THURSDAY = 'th';
-    const FRIDAY = 'fr';
-    const SATURDAY = 'sa';
-    const SUNDAY = 'su';
+    const MONDAY = 'Mo';
+    const TUESDAY = 'Tu';
+    const WEDNESDAY = 'We';
+    const THURSDAY = 'Th';
+    const FRIDAY = 'Fr';
+    const SATURDAY = 'Sa';
+    const SUNDAY = 'Su';
 
     public static function days(): array
     {

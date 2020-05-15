@@ -12,4 +12,5 @@ return [
     'su' => 'Dimanche',
     'open' => 'Ouvert',
     'close' => 'Fermer',
+    'closed' => 'Fermé',
 ];

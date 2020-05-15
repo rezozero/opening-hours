@@ -5,181 +5,291 @@ namespace Lib\OpeningHours;
 use Lib\OpeningHours\Helpers\DataTrait;
 use Lib\OpeningHours\Helpers\Lang;
 
+/**
+ * Class OpeningHours
+ * @package Lib\OpeningHours
+ */
 class OpeningHours
 {
+    /**
+     * @var array
+     */
+    public static $formatters = [
+        'fr' => FrenchFormatter::class,
+        'en' => EnglishFormatter::class,
+    ];
 
     use DataTrait;
 
-    protected $locale = 'en';
+    /**
+     * @var array
+     */
     protected $openingDay = [];
+    /**
+     * @var array
+     */
     protected $closingDay = [];
-
-
-    public function __construct($locale)
-    {
-        $this->locale = $locale;
-    }
-
     /**
-     * @param string[][] $data
-     * @param string $locale
-     * @return static
-     * @throws \Exception
+     * @var array
      */
-    public static function setData(array $data, $locale = 'en'): self
+    protected $options = [
+        'locale' => 'en',
+        'capitalize' => false,
+        'combinedDays' => false,
+    ];
+
+
+    /**
+     * OpeningHours constructor.
+     * @param $data
+     */
+    public function __construct($data)
     {
-        return (new static($locale))->buildData($data);
+        $this->data = $data;
     }
 
     /**
-     * @param array $data
      *
-     * @return bool
      */
-    public static function isValid(array $data): bool
+    public function buildData()
     {
         try {
-            static::setData($data);
+            if (!is_array($this->getData())) {
+                throw new \Exception("OpeningHours data must be an array", 1);
+            }
 
-            return true;
-        } catch (Exception $exception) {
-            return false;
+            foreach ($this->getData() as $openingHourData) {
+                $openingHourData = explode(" ", $openingHourData);
+                $days = $openingHourData[0] ?? "";
+                $times = $openingHourData[1] ?? "";
+                $this->associateDayHours($days, $times);
+            }
+            $this->findDayNotGiven();
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
         }
-    }
-
-    public function buildData(array $data)
-    {
-        if (!is_array($data)) {
-            throw new \Exception("OpeningHours data must be an array", 1);
-        }
-
-        foreach ($data as $openingHourData) {
-            $openingHourData = explode(" ", $openingHourData);
-            $days = $openingHourData[0]??"";
-            $times = $openingHourData[1]??"";
-            $this->associateDayHours($days, $times);
-        }
-        return $this;
 
     }
 
-    protected function associateDayHours ($days, $times)
+    /**
+     * @param $times
+     * @return bool
+     * @throws \Exception
+     */
+    private function parseTimes($times)
     {
+        $formatter = $this->getFormatter($this->options['locale']);
+        $hours = false;
+        $times = explode(",", $times);
+        if (isset($times[0])) {
+            $time = explode("-", $times[0]);
+            $hours['hours'][] = [
+                'opensAt' => isset($this->options['no_locale']) ? (new \DateTime($time[0]))->format('H:i:s') : $formatter->formatHour($time[0]),
+                'closesAt' => isset($this->options['no_locale']) ? (new \DateTime($time[1]))->format('H:i:s') : $formatter->formatHour($time[1])
+            ];
+        }
 
+        if (isset($times[1])) {
+            $time = explode("-", $times[1]);
+            $hours['hours'][] = [
+                'opensAt' => isset($this->options['no_locale']) ? (new \DateTime($time[0]))->format('H:i:s') : $formatter->formatHour($time[0]),
+                'closesAt' => isset($this->options['no_locale']) ? (new \DateTime($time[1]))->format('H:i:s') : $formatter->formatHour($time[1])
+            ];
+        }
+
+        return $hours;
+    }
+
+    /**
+     * @param $days
+     * @param $times
+     * @throws \Exception
+     */
+    protected function associateDayHours($days, $times)
+    {
+        $timesParser = false;
         if ($days) {
-            $days = explode (",", $days);
+            $days = explode(",", $days);
         }
 
-        /*if ($times) {
-            $times = explode ("-", $days);
-        }*/
-        $tempDay = [];
         if ($times) {
+            $timesParser = $this->parseTimes($times);
+        }
+        $tempDay = [];
+
+        if ($timesParser) {
             foreach ($days as $day) {
-                $tempDay[strtolower($day)] = $this->normalizeDayName($day) ." ". $times;
+                $tempDay[$day] = ['hours' => $timesParser['hours']
+                ];
             }
             $this->openingDay = array_merge($this->openingDay, $tempDay);
         } else {
             foreach ($days as $day) {
-                $tempDay[strtolower($day)] = $this->normalizeDayName($day);
+                $tempDay[$day] = null;
             }
+
             $this->closingDay = array_merge($this->closingDay, $tempDay);
         }
+
     }
 
     /**
-     * @return array
+     *
      */
-    public function getOpeningDay () : array
+    protected function findDayNotGiven()
     {
-        return $this->openingDay;
-    }
-
-    /**
-     * @return string
-     */
-    public function getOpeningDayHtml () : string
-    {
-        if (!empty($this->openingDay)) {
-            $strintHtml = "<span class='opening-hours-title'>".Lang::t('open', [], $this->locale)."</span>";
-            $strintHtml .= "<ul class='opening-hours open-day'>";
-            foreach($this->openingDay as $singleDay) {
-                $strintHtml .= "<li>$singleDay</li>";
+        $allDayFound = array_merge($this->openingDay, $this->closingDay);
+        $allDay = Day::days();
+        $tempDay = [];
+        foreach ($allDay as $day) {
+            if (!isset($allDayFound[$day])) {
+                $tempDay[$day] = null;
             }
-
-            return $strintHtml .= "</ul>";
         }
-        return "";
+        $this->closingDay = array_merge($this->closingDay, $tempDay);
     }
 
     /**
      * @return array
      */
-    public function getClosingDay () : array
+    public function reordingAllDays()
     {
+        $allDayFound = array_merge($this->openingDay, $this->closingDay);
+        $allDay = Day::days();
+        $tempDay = [];
+        foreach ($allDay as $day) {
+            $tempDay[$day] = $allDayFound[$day];
+        }
+
+        return $tempDay;
+    }
+
+    /**
+     * @return array
+     */
+    public function getClosedDaysAsArray(): array
+    {
+        $this->buildData();
         return $this->closingDay;
     }
 
     /**
+     * @param null $combinedDays
+     * @param null $capitalize
+     * @param null $locale
      * @return string
      */
-    public function getClosingDayHtml () : string
+    public function getClosedDaysAsHtml(array $options = []): string
     {
-        if (!empty($this->closingDay)) {
-            $strintHtml = "<span class='opening-hours-title'>".Lang::t('close', [], $this->locale)."</span>";
-            $strintHtml .= "<ul class='opening-hours close-day'>";
-            foreach($this->closingDay as $singleDay) {
-                $strintHtml .= "<li>$singleDay</li>";
-            }
+        $this->setOptions($options);
+        $this->buildData();
+        $allDayFound = $this->getClosedDaysAsArray();
 
-            return $strintHtml .= "</ul>";
-        }
-        return "";
+        return $this->transformDaysAsHtml($allDayFound);
     }
+
 
     /**
      * @return array
      */
-    public function getAllDay () : array
+    public function getAllDaysAsArray(): array
     {
-        return array_merge($this->openingDay, $this->closingDay);
+        $this->setOptions(['no_locale' => true]);
+        $this->buildData();
+
+        return $this->reordingAllDays();
     }
+
     /**
+     * @param null $combinedDays
+     * @param null $capitalize
+     * @param null $locale
      * @return string
      */
-    public function getAllDayHtml () : string
+    public function getAllDaysAsHtml(array $options = []): string
     {
-        $allDay = array_merge($this->openingDay, $this->closingDay);
-        if (!empty($allDay)) {
-            $strintHtml = "<span class='opening-hours-title'>".Lang::t('open', [], $this->locale)."</span>";
-            $strintHtml .= "<ul class='opening-hours open-day'>";
-            foreach($allDay as $singleDay) {
-                $strintHtml .= "<li>$singleDay</li>";
-            }
+        $this->setOptions($options);
+        $this->buildData();
+        $allDayFound = $this->reordingAllDays();
 
-            return $strintHtml .= "</ul>";
-        }
-        return "";
+        return $this->transformDaysAsHtml($allDayFound);
     }
 
+    /**
+     * @param $allDayFound
+     * @return string
+     */
+    public function transformDaysAsHtml($allDayFound)
+    {
+        $formatter = $this->getFormatter($this->options['locale']);
+        $strintHtml = "";
+        $labelClose = $formatter->formatText('closed', $this->options);
+        if ($this->options['combinedDays']) {
+            $combinedDays = [];
+            foreach ($allDayFound as $singleDayToCombine => $dataHoursToCombine) {
+                //search all day for same hour
+                $labelHour = $labelClose;
+                if (null !== $dataHoursToCombine && !empty($dataHoursToCombine)) {
+                    $labelHour = "";
+                    foreach ($dataHoursToCombine['hours'] as $hour) {
+                        $labelHour .= $hour['opensAt'] . " - " . $hour['closesAt'] . ", ";
+                    }
+                    $labelHour = substr(trim($labelHour), 0, -1);
+                    $combinedDays[$labelHour][] = $this->normalizeDayName($singleDayToCombine);
+                } else {
+                    $combinedDays[$labelHour][] = $this->normalizeDayName($singleDayToCombine);
+                }
+            }
+            foreach ($combinedDays as $labelHour => $daysCombined) {
+                $labelDay = "";
+                foreach ($daysCombined as $day) {
+                    $labelDay .= $day . ", ";
+                }
+                $labelDay = substr(trim($labelDay), 0, -1);
+                $strintHtml .=
+                    '<span class="oh-group"><span class="oh-days">' . $labelDay . '</span> <span class="oh-hours">' . $labelHour . '</span></span>';
+            }
+
+            return $strintHtml;
+        }
+
+        if (!empty($allDayFound)) {
+            foreach ($allDayFound as $singleDay => $dataHours) {
+                $labelHour = $labelClose;
+                if (null !== $dataHours && !empty($dataHours)) {
+                    $labelHour = "";
+                    foreach ($dataHours['hours'] as $hour) {
+                        $labelHour .= $hour['opensAt'] . " - " . $hour['closesAt'] . ", ";
+                    }
+                    $labelHour = substr(trim($labelHour), 0, -1);
+                }
+                $strintHtml .=
+                    '<span class="oh-group"><span class="oh-days">' . $this->normalizeDayName($singleDay) . '</span> <span class="oh-hours">' . $labelHour . '</span></span>';
+            }
+
+        }
+        return $strintHtml;
+    }
+
+    /**
+     * @param string $day
+     * @return mixed
+     */
     protected function normalizeDayName(string $day)
     {
-        $day = strtolower($day);
-
-        if (! Day::isValid($day)) {
+        $formatter = $this->getFormatter($this->options['locale']);
+        if (!Day::isValid($day)) {
             throw InvalidDayName::invalidDayName($day);
         }
         //translate this day
-        $day = Lang::t($day, [], $this->locale);
-
-        return $day;
+        return $formatter->formatDay($day, $this->options);
     }
 
     /**
      * @param \DateTime $date
      * @return array
      */
-    public function checkOpeningDay(\DateTime $date)
+    public function isOpenedAt(\DateTime $date)
     {
 
         return $this->dataOpeningOneDay($date);
@@ -187,21 +297,21 @@ class OpeningHours
 
     /**
      * @param $date
-     * @return array
+     * @return bool
      */
-    protected function dataOpeningOneDay ($date)
+    protected function dataOpeningOneDay($date)
     {
-        $allDay = $this->getAllDay();
+        $allDay = $this->getAllDaysAsArray();
         $day = $date->format('D');
 
-        $findDay = $allDay[strtolower(substr($day,0,2))]??false;
+        $findDay = $allDay[strtolower(substr($day, 0, 2))] ?? false;
         if ($findDay) {
             $foundDay = explode(" ", $findDay);
             if (isset($foundDay[1])) {
-                return ["open" => true, "hour"=> $foundDay[1]];
+                return true;
             }
         }
 
-        return ['open' => false];
+        return false;
     }
 }

@@ -16,6 +16,7 @@ class Lang {
         if ( isset($translation[$locale][$string]) ) {
             $string = $translation[$locale][$string];
         }
+
         // Replace arguments if present.
         if ( empty($args) ) {
             return $string;
