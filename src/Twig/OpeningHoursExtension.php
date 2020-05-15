@@ -3,8 +3,7 @@
 namespace Lib\OpeningHours\Twig;
 
 use DateTime;
-use Lib\OpeningHours\Helpers\DataTrait;
-use Lib\OpeningHours\Helpers\Lang;
+
 use Lib\OpeningHours\OpeningHours;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -15,66 +14,15 @@ class OpeningHoursExtension extends AbstractExtension
     public function getFilters()
     {
         return [
-            new TwigFilter('opening_day', [$this, 'getOpeningDay'], ['is_safe' => ['html']]),
-            new TwigFilter('closing_daty', [$this, 'getClosingDay'], ['is_safe' => ['html']]),
             new TwigFilter('all_day', [$this, 'getAllDay'], ['is_safe' => ['html']]),
-            new TwigFilter('check_opening_day', [$this, 'checkOpeningDay'], ['is_safe' => ['html']]),
+            new TwigFilter('closing_day', [$this, 'getClosingDay'], ['is_safe' => ['html']]),
+            new TwigFilter('is_opened_at', [$this, 'isOpenedAt'], ['is_safe' => ['html']]),
         ];
     }
 
     /**
      * @param array $data
-     * @param string $locale Default: 'en'
-     * @param boolean $html Default: false
-     *
-     * @return string | array
-     * @throws \Exception
-     */
-    public function getOpeningDay(
-        $data,
-        $locale = "en",
-        $html = false
-    ) {
-        if (!is_array($data)) {
-            throw new \Exception("OpeningHours data must be an array", 1);
-        }
-        $openingHours = OpeningHours::setData($data, $locale);
-
-        if ($html) {
-            return $openingHours->getOpeningDayHtml();
-        }
-
-        return $openingHours->getOpeningDay();
-    }
-
-    /**
-     * @param array $data
-     * @param string $locale Default: 'en'
-     * @param boolean $html Default: false
-     *
-     * @return string | array
-     * @throws \Exception
-     */
-    public function getClosingDay(
-        $data,
-        $locale = "en",
-        $html = false
-    ) {
-        if (!is_array($data)) {
-            throw new \Exception("OpeningHours data must be an array", 1);
-        }
-        $openingHours = OpeningHours::setData($data, $locale);
-
-        if ($html) {
-            return $openingHours->getClosingDayHtml();
-        }
-
-        return $openingHours->getClosingDay();
-    }
-
-    /**
-     * @param array $data
-     * @param string $locale Default: 'en'
+     * @param array $options
      * @param boolean $html Default: false
      *
      * @return string | array
@@ -82,19 +30,44 @@ class OpeningHoursExtension extends AbstractExtension
      */
     public function getAllDay(
         $data,
-        $locale = "en",
-        $html = false
+        $options,
+        $html
     ) {
         if (!is_array($data)) {
             throw new \Exception("OpeningHours data must be an array", 1);
         }
-        $openingHours = OpeningHours::setData($data, $locale);
+        $openingHours = new OpeningHours($data);
 
         if ($html) {
-            return $openingHours->getAllDayHtml();
+            return $openingHours->getAllDaysAsHtml($options);
         }
 
-        return $openingHours->getAllDay();
+        return $openingHours->getAllDaysAsArray();
+    }
+
+    /**
+     * @param array $data
+     * @param $options
+     * @param boolean $html Default: false
+     *
+     * @return string | array
+     * @throws \Exception
+     */
+    public function getClosingDay(
+        $data,
+        $options,
+        $html
+    ) {
+        if (!is_array($data)) {
+            throw new \Exception("OpeningHours data must be an array", 1);
+        }
+        $openingHours = new OpeningHours($data);
+
+        if ($html) {
+            return $openingHours->getClosedDaysAsHtml($options);
+        }
+
+        return $openingHours->getClosedDaysAsArray();
     }
 
     /**
@@ -104,15 +77,15 @@ class OpeningHoursExtension extends AbstractExtension
      * @return string | array
      * @throws \Exception
      */
-    public function checkOpeningDay(
+    public function isOpenedAt(
         $data,
         $date
     ) {
         if (!is_array($data)) {
             throw new \Exception("OpeningHours data must be an array", 1);
         }
-        $openingHours = OpeningHours::setData($data);
+        $openingHours = new OpeningHours($data);
 
-        return $openingHours->checkOpeningDay($date);
+        return $openingHours->isOpenedAt($date);
     }
 }
