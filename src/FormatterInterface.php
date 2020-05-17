@@ -23,7 +23,7 @@ interface FormatterInterface
     public function formatDay($day, $options = []) : string;
 
     /**
-     * @param $text
+     * @param string $text
      * @param array $options
      * @return string
      */

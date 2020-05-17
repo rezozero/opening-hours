@@ -47,7 +47,7 @@ class OpeningHoursExtension extends AbstractExtension
 
     /**
      * @param array $data
-     * @param $options
+     * @param array $options
      * @param boolean $html Default: false
      *
      * @return string | array
@@ -74,7 +74,7 @@ class OpeningHoursExtension extends AbstractExtension
      * @param array $data
      * @param DateTime $date
      *
-     * @return string | array
+     * @return bool
      * @throws \Exception
      */
     public function isOpenedAt(

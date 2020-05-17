@@ -42,7 +42,7 @@ class OpeningHours
 
     /**
      * OpeningHours constructor.
-     * @param $data
+     * @param array $data
      */
     public function __construct($data)
     {
@@ -73,7 +73,7 @@ class OpeningHours
     }
 
     /**
-     * @param strring $times
+     * @param string $times
      * @return mixed
      * @throws \Exception
      */
@@ -84,7 +84,8 @@ class OpeningHours
         $times = explode(",", $times);
         if (isset($times[0])) {
             $time = explode("-", $times[0]);
-            $hours['hours'][] = [
+            $hours['hours'][] =
+                [
                 'opensAt' => isset($this->options['no_locale']) ? (new \DateTime($time[0]))->format('H:i:s') : $formatter->formatHour($time[0]),
                 'closesAt' => isset($this->options['no_locale']) ? (new \DateTime($time[1]))->format('H:i:s') : $formatter->formatHour($time[1])
             ];
@@ -175,10 +176,9 @@ class OpeningHours
     }
 
     /**
-     * @param null $combinedDays
-     * @param null $capitalize
-     * @param null $locale
+     * @param array $options
      * @return string
+     * @throws \Exception
      */
     public function getClosedDaysAsHtml(array $options = []): string
     {
@@ -205,6 +205,7 @@ class OpeningHours
     /**
      * @param array $options
      * @return string
+     * @throws \Exception
      */
     public function getAllDaysAsHtml(array $options = []): string
     {
@@ -219,6 +220,7 @@ class OpeningHours
     /**
      * @param array $allDayFound
      * @return string
+     * @throws \Exception
      */
     protected function transformDaysAsHtml(array $allDayFound): string
     {
@@ -321,12 +323,13 @@ class OpeningHours
     /**
      * @param string $day
      * @return mixed
+     * @throws \Exception
      */
-    protected function normalizeDayName(string $day)
+    protected function normalizeDayName($day)
     {
         $formatter = $this->getFormatter($this->options['locale']);
         if (!Day::isValid($day)) {
-            throw InvalidDayName::invalidDayName($day);
+            throw new \Exception('Invalid Day Name ' . $day);
         }
         //translate this day
         return $formatter->formatDay($day, $this->options);

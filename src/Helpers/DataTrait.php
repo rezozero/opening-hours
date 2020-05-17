@@ -34,12 +34,17 @@ trait DataTrait
          $this->options = array_merge($this->getDefaultOptions(), $options);
     }
 
+    /**
+     * @param string $locale
+     * @return mixed
+     * @throws \Exception
+     */
     protected function getFormatter(string $locale)
     {
         if (isset(static::$formatters[$locale])) {
             $formatterClass = static::$formatters[$locale];
             return new $formatterClass();
         }
-        throw new FormatterNotFound('No formatter was found for locale ' . $locale);
+        throw new \Exception('No formatter was found for locale ' . $locale);
     }
 }

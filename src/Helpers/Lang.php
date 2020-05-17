@@ -7,6 +7,7 @@ class Lang {
     public static function t($string, $args = array(), $locale = "fr")
     {
         global $translation;
+        $message = null;
         if (file_exists(__DIR__.'/../lang/'.$locale.'/message.php')) {
             $message = include(__DIR__.'/../lang/'.$locale.'/message.php');
         }
