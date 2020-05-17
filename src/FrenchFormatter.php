@@ -17,7 +17,7 @@ class FrenchFormatter
     }
 
     /**
-     * @param $hour
+     * @param string $hour
      * @return string
      */
     public function formatHour($hour) : string
@@ -32,19 +32,19 @@ class FrenchFormatter
         return $hour;
     }
     /**
-     * @param $day
+     * @param string $day
      * @param array $options
      * @return string
      */
     public function formatDay($day, $options = []) : string
     {
-        $day = Lang::t(strtolower($day), [], $this->getLocale());
+        $day = Lang::t(mb_strtolower($day), [], $this->getLocale());
 
-        return $options['capitalize'] ? ucfirst($day) : strtolower($day);
+        return $options['capitalize'] ? ucfirst($day) : mb_strtolower($day);
     }
 
     /**
-     * @param $text
+     * @param string $text
      * @param array $options
      * @return string
      */
@@ -52,6 +52,6 @@ class FrenchFormatter
     {
         $text = Lang::t($text, [], $this->getLocale());
 
-        return $options['capitalize'] ? ucfirst($text) : strtolower($text);
+        return $options['capitalize'] ? ucfirst($text) : mb_strtolower($text);
     }
 }

@@ -53,7 +53,7 @@ class OpeningHoursExtension extends AbstractExtension
      * @return string | array
      * @throws \Exception
      */
-    public function getClosingDay(
+    protected function getClosingDay(
         $data,
         $options,
         $html

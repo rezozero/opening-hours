@@ -10,22 +10,22 @@ namespace Lib\OpeningHours;
 interface FormatterInterface
 {
     /**
-     * @param $hour
+     * @param string $hour
      * @return string
      */
     public function formatHour($hour) : string;
 
     /**
-     * @param $day
+     * @param string $day
      * @param array $options
      * @return string
      */
     public function formatDay($day, $options = []) : string;
 
     /**
-     * @param $day
+     * @param $text
      * @param array $options
      * @return string
      */
-    public function formatText($day, $options = []) : string;
+    public function formatText($text, $options = []) : string;
 }

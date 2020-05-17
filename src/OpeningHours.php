@@ -4,6 +4,7 @@ namespace Lib\OpeningHours;
 
 use Lib\OpeningHours\Helpers\DataTrait;
 use Lib\OpeningHours\Helpers\Lang;
+use mageekguy\atoum\asserters\boolean;
 
 /**
  * Class OpeningHours
@@ -51,7 +52,7 @@ class OpeningHours
     /**
      *
      */
-    public function buildData()
+    protected function buildData()
     {
         try {
             if (!is_array($this->getData())) {
@@ -72,8 +73,8 @@ class OpeningHours
     }
 
     /**
-     * @param $times
-     * @return bool
+     * @param strring $times
+     * @return mixed
      * @throws \Exception
      */
     private function parseTimes($times)
@@ -101,8 +102,8 @@ class OpeningHours
     }
 
     /**
-     * @param $days
-     * @param $times
+     * @param string $days
+     * @param string $times
      * @throws \Exception
      */
     protected function associateDayHours($days, $times)
@@ -133,9 +134,7 @@ class OpeningHours
 
     }
 
-    /**
-     *
-     */
+
     protected function findDayNotGiven()
     {
         $allDayFound = array_merge($this->openingDay, $this->closingDay);
@@ -150,15 +149,16 @@ class OpeningHours
     }
 
     /**
+     * @param array $allDayFound
      * @return array
      */
-    public function reordingAllDays()
+    protected function reorderingAllDays(array $allDayFound): array
     {
-        $allDayFound = array_merge($this->openingDay, $this->closingDay);
         $allDay = Day::days();
         $tempDay = [];
         foreach ($allDay as $day) {
-            $tempDay[$day] = $allDayFound[$day];
+            if (key_exists($day, $allDayFound))
+                $tempDay[$day] = $allDayFound[$day];
         }
 
         return $tempDay;
@@ -170,7 +170,8 @@ class OpeningHours
     public function getClosedDaysAsArray(): array
     {
         $this->buildData();
-        return $this->closingDay;
+
+        return  $this->reorderingAllDays($this->closingDay);
     }
 
     /**
@@ -196,36 +197,37 @@ class OpeningHours
     {
         $this->setOptions(['no_locale' => true]);
         $this->buildData();
+        $allDayFound = array_merge($this->openingDay, $this->closingDay);
 
-        return $this->reordingAllDays();
+        return $this->reorderingAllDays($allDayFound);
     }
 
     /**
-     * @param null $combinedDays
-     * @param null $capitalize
-     * @param null $locale
+     * @param array $options
      * @return string
      */
     public function getAllDaysAsHtml(array $options = []): string
     {
         $this->setOptions($options);
         $this->buildData();
-        $allDayFound = $this->reordingAllDays();
+        $allDayFound = array_merge($this->openingDay, $this->closingDay);
+        $allDayFound = $this->reorderingAllDays($allDayFound);
 
         return $this->transformDaysAsHtml($allDayFound);
     }
 
     /**
-     * @param $allDayFound
+     * @param array $allDayFound
      * @return string
      */
-    public function transformDaysAsHtml($allDayFound)
+    protected function transformDaysAsHtml(array $allDayFound): string
     {
         $formatter = $this->getFormatter($this->options['locale']);
         $strintHtml = "";
         $labelClose = $formatter->formatText('closed', $this->options);
         if ($this->options['combinedDays']) {
             $combinedDays = [];
+            $combinedDaysClass = [];
             foreach ($allDayFound as $singleDayToCombine => $dataHoursToCombine) {
                 //search all day for same hour
                 $labelHour = $labelClose;
@@ -234,41 +236,86 @@ class OpeningHours
                     foreach ($dataHoursToCombine['hours'] as $hour) {
                         $labelHour .= $hour['opensAt'] . " - " . $hour['closesAt'] . ", ";
                     }
-                    $labelHour = substr(trim($labelHour), 0, -1);
-                    $combinedDays[$labelHour][] = $this->normalizeDayName($singleDayToCombine);
+                    $labelHour = mb_substr(trim($labelHour), 0, -1);
+                    $combinedDays[$labelHour][] = $singleDayToCombine;
+                    $combinedDaysClass[$labelHour] = 'oh-hours';
                 } else {
-                    $combinedDays[$labelHour][] = $this->normalizeDayName($singleDayToCombine);
+                    $combinedDaysClass[$labelHour] = 'oh-status';
+                    $combinedDays[$labelHour][] = $singleDayToCombine;
                 }
             }
+            //reordering this $combinedDays
+            $allDay = Day::days();
+            $combinedDaysReordering = [];
             foreach ($combinedDays as $labelHour => $daysCombined) {
-                $labelDay = "";
-                foreach ($daysCombined as $day) {
-                    $labelDay .= $day . ", ";
+                $tempDayGrouped = [];
+                $tempDayNoGrouped = [];
+                foreach ($daysCombined as $key => $dayCombined) {
+                    $a = array_search($dayCombined, $allDay);
+                    $b = array_search(next($daysCombined), $allDay);
+                    if (is_int($b) && $a == $b - 1 ) {
+                        //on group
+                        $tempDayGrouped[$a] = $dayCombined;
+                    } elseif (is_bool($b) && !$b && isset($daysCombined[$key - 1])){
+                        $b =array_search($daysCombined[$key - 1], $allDay);
+                        if ($b + 1 == $a) {
+                            $tempDayGrouped[$a] = $dayCombined;
+                        } else {
+                            $tempDayNoGrouped[$a] = $dayCombined;
+                        }
+                    } else {
+                        $tempDayNoGrouped[$a] = $dayCombined;
+                    }
                 }
-                $labelDay = substr(trim($labelDay), 0, -1);
-                $strintHtml .=
-                    '<span class="oh-group"><span class="oh-days">' . $labelDay . '</span> <span class="oh-hours">' . $labelHour . '</span></span>';
+
+                if (!empty($tempDayGrouped)) {
+                    $a = array_search(reset($tempDayGrouped), $allDay);
+                    $combinedDaysReordering[$a][$labelHour] = $tempDayGrouped;
+                }
+
+                if (!empty($tempDayNoGrouped)) {
+                    $a = array_search(reset($tempDayNoGrouped), $allDay);
+                    $combinedDaysReordering[$a][$labelHour] = $tempDayNoGrouped;
+                }
             }
 
-            return $strintHtml;
+            ksort($combinedDaysReordering);
+            //reordering this $combinedDays
+            foreach ($combinedDaysReordering as $combinedDays) {
+                foreach ($combinedDays as $labelHour => $daysCombined) {
+                    $labelDay = "";
+                    foreach ($daysCombined as $day) {
+                        $labelDay .= $this->normalizeDayName($day) . ", ";
+                    }
+                    $labelDay = substr(trim($labelDay), 0, -1);
+                    $strintHtml .=
+                        '<span class="oh-group"><span class="oh-days">' . $labelDay . '</span> <span class="'.$combinedDaysClass[$labelHour].'">' . $labelHour . '</span></span>'.PHP_EOL;
+                }
+            }
+
+
+            return trim($strintHtml);
         }
 
         if (!empty($allDayFound)) {
             foreach ($allDayFound as $singleDay => $dataHours) {
                 $labelHour = $labelClose;
+                $classHour = 'oh-status';
                 if (null !== $dataHours && !empty($dataHours)) {
                     $labelHour = "";
                     foreach ($dataHours['hours'] as $hour) {
                         $labelHour .= $hour['opensAt'] . " - " . $hour['closesAt'] . ", ";
                     }
                     $labelHour = substr(trim($labelHour), 0, -1);
+                    $classHour = 'oh-hours';
                 }
                 $strintHtml .=
-                    '<span class="oh-group"><span class="oh-days">' . $this->normalizeDayName($singleDay) . '</span> <span class="oh-hours">' . $labelHour . '</span></span>';
+                    '<span class="oh-group"><span class="oh-days">' . $this->normalizeDayName($singleDay) . '</span> <span class="'.$classHour.'">' . $labelHour . '</span></span>'. PHP_EOL;
             }
 
         }
-        return $strintHtml;
+
+        return trim($strintHtml);
     }
 
     /**
@@ -287,28 +334,32 @@ class OpeningHours
 
     /**
      * @param \DateTime $date
-     * @return array
+     * @return bool
      */
     public function isOpenedAt(\DateTime $date)
     {
-
         return $this->dataOpeningOneDay($date);
     }
 
     /**
-     * @param $date
+     * @param \DateTime $date
      * @return bool
      */
-    protected function dataOpeningOneDay($date)
+    protected function dataOpeningOneDay(\DateTime $date)
     {
         $allDay = $this->getAllDaysAsArray();
         $day = $date->format('D');
+        $times = $date->format('H:i');
+        $times = strtotime($times);
 
-        $findDay = $allDay[strtolower(substr($day, 0, 2))] ?? false;
-        if ($findDay) {
-            $foundDay = explode(" ", $findDay);
-            if (isset($foundDay[1])) {
-                return true;
+        $findDay = $allDay[mb_substr($day, 0, 2)] ?? false;
+        if (is_array($findDay) && $findDay['hours']) {
+            foreach ($findDay['hours'] as $hour) {
+                $opensAt =  strtotime($hour['opensAt']);
+                $closesAt = strtotime($hour['closesAt']);
+                if ($opensAt <= $times && $closesAt >= $times) {
+                    return true;
+                }
             }
         }
 
