@@ -1,5 +1,5 @@
 <?php
-namespace Lib\OpeningHours\Helpers;
+namespace RZ\OpeningHours\Helpers;
 
 class Lang
 {

@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Lib\OpeningHours;
+namespace RZ\OpeningHours;
 
-use Lib\OpeningHours\Helpers\Lang;
+use RZ\OpeningHours\Helpers\Lang;
 
 class FrenchFormatter
 {

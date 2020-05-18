@@ -3,10 +3,10 @@
  * to run this test, you must launch this instruction on your console
  * php ./vendor/atoum/atoum/bin/atoum -f tests/units/OpeningHours.php
  */
-namespace Lib\OpeningHours\tests\units;
+namespace RZ\OpeningHours\tests\units;
 
 use atoum;
-use Lib\OpeningHours\OpeningHours as BaseOpeningHours;
+use RZ\OpeningHours\OpeningHours as BaseOpeningHours;
 
 class OpeningHours extends atoum
 {

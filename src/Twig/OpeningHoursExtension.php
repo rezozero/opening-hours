@@ -1,10 +1,10 @@
 <?php
 
-namespace Lib\OpeningHours\Twig;
+namespace RZ\OpeningHours\Twig;
 
 use DateTime;
 
-use Lib\OpeningHours\OpeningHours;
+use RZ\OpeningHours\OpeningHours;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 

@@ -1,14 +1,14 @@
 <?php
 
-namespace Lib\OpeningHours;
+namespace RZ\OpeningHours;
 
-use Lib\OpeningHours\Helpers\DataTrait;
-use Lib\OpeningHours\Helpers\Lang;
-use mageekguy\atoum\asserters\boolean;
+use RZ\OpeningHours\Exceptions\InvalidDayName;
+use RZ\OpeningHours\Exceptions\InvalidTimeString;
+use RZ\OpeningHours\Helpers\DataTrait;
 
 /**
  * Class OpeningHours
- * @package Lib\OpeningHours
+ * @package RZ\OpeningHours
  */
 class OpeningHours
 {
@@ -83,8 +83,17 @@ class OpeningHours
         $timeStart = $time[0]??null;
         $timeEnd = $time[1]??null;
         if ($timeStart && $timeEnd) {
+            if (! preg_match('/^(([0-1][0-9]|2[0-3]):[0-5][0-9]|24:00)$/', $timeStart)) {
+                throw InvalidTimeString::invalidTime($timeStart);
+            }
+
+            if (! preg_match('/^(([0-1][0-9]|2[0-3]):[0-5][0-9]|24:00)$/', $timeEnd)) {
+                throw InvalidTimeString::invalidTime($timeEnd);
+            }
+
             $timeStart = str_replace('h', ':', $timeStart);
             $timeEnd = str_replace('h', ':', $timeEnd);
+
             return [
                 'opensAt' => isset($this->options['no_locale']) ? (new \DateTime($timeStart))->format('H:i:s') : $formatter->formatHour($timeStart),
                 'closesAt' => isset($this->options['no_locale']) ? (new \DateTime($timeEnd))->format('H:i:s') : $formatter->formatHour($timeEnd)
@@ -135,12 +144,18 @@ class OpeningHours
 
         if ($timesParser) {
             foreach ($days as $day) {
+                if (!Day::isValid($day)) {
+                    throw InvalidDayName::invalidDayName($day);
+                }
                 $tempDay[$day] = ['hours' => $timesParser['hours']
                 ];
             }
             $this->openingDay = array_merge($this->openingDay, $tempDay);
         } else {
             foreach ($days as $day) {
+                if (!Day::isValid($day)) {
+                    throw InvalidDayName::invalidDayName($day);
+                }
                 $tempDay[$day] = null;
             }
 
@@ -342,7 +357,7 @@ class OpeningHours
     {
         $formatter = $this->getFormatter($this->options['locale']);
         if (!Day::isValid($day)) {
-            throw new \Exception('Invalid Day Name ' . $day);
+            throw InvalidDayName::invalidDayName($day);
         }
         //translate this day
         return $formatter->formatDay($day, $this->options);

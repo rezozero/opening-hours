@@ -1,10 +1,10 @@
 <?php
 
-namespace Lib\OpeningHours;
+namespace RZ\OpeningHours;
 
 /**
  * Interface FormatterInterface
- * @package Lib\OpeningHours
+ * @package RZ\OpeningHours
  */
 interface FormatterInterface
 {

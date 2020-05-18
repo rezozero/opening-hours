@@ -1,8 +1,9 @@
 <?php
 
-namespace Lib\OpeningHours\Helpers;
+namespace RZ\OpeningHours\Helpers;
 
-use Lib\OpeningHours\FormatterInterface;
+use RZ\OpeningHours\Exceptions\InvalidFormatterByLocale;
+use RZ\OpeningHours\FormatterInterface;
 
 trait DataTrait
 {
@@ -37,7 +38,7 @@ trait DataTrait
     /**
      * @param string $locale
      * @return mixed
-     * @throws \Exception
+     * @throws InvalidFormatterByLocale
      */
     protected function getFormatter(string $locale)
     {
@@ -45,6 +46,6 @@ trait DataTrait
             $formatterClass = static::$formatters[$locale];
             return new $formatterClass();
         }
-        throw new \Exception('No formatter was found for locale ' . $locale);
+        throw InvalidFormatterByLocale::invalidFormatter($locale);
     }
 }

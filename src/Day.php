@@ -1,6 +1,6 @@
 <?php
 
-namespace Lib\OpeningHours;
+namespace RZ\OpeningHours;
 
 class Day
 {
