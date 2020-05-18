@@ -91,9 +91,6 @@ class OpeningHours
                 throw InvalidTimeString::invalidTime($timeEnd);
             }
 
-            $timeStart = str_replace('h', ':', $timeStart);
-            $timeEnd = str_replace('h', ':', $timeEnd);
-
             return [
                 'opensAt' => isset($this->options['no_locale']) ? (new \DateTime($timeStart))->format('H:i:s') : $formatter->formatHour($timeStart),
                 'closesAt' => isset($this->options['no_locale']) ? (new \DateTime($timeEnd))->format('H:i:s') : $formatter->formatHour($timeEnd)
