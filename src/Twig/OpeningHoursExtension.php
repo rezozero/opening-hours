@@ -22,7 +22,7 @@ class OpeningHoursExtension extends AbstractExtension
 
     /**
      * @param array $data
-     * @param array $options
+     * @param array $options Default: []
      * @param boolean $html Default: false
      *
      * @return string | array
@@ -30,8 +30,8 @@ class OpeningHoursExtension extends AbstractExtension
      */
     public function getAllDay(
         $data,
-        $options,
-        $html
+        $options = [],
+        $html = false
     ) {
         if (!is_array($data)) {
             throw new \Exception("OpeningHours data must be an array", 1);
@@ -47,7 +47,7 @@ class OpeningHoursExtension extends AbstractExtension
 
     /**
      * @param array $data
-     * @param array $options
+     * @param array $options Default: []
      * @param boolean $html Default: false
      *
      * @return string | array
@@ -55,8 +55,8 @@ class OpeningHoursExtension extends AbstractExtension
      */
     protected function getClosingDay(
         $data,
-        $options,
-        $html
+        $options = [],
+        $html = false
     ) {
         if (!is_array($data)) {
             throw new \Exception("OpeningHours data must be an array", 1);

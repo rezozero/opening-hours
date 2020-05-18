@@ -73,6 +73,29 @@ class OpeningHours
     }
 
     /**
+     * @param array $times
+     * @return array|bool
+     * @throws \Exception
+     */
+    protected function exploderTime ($times)
+    {
+        $formatter = $this->getFormatter($this->options['locale']);
+        $time = explode("-",$times);
+        $timeStart = $time[0]??null;
+        $timeEnd = $time[1]??null;
+        if ($timeStart && $timeEnd) {
+            $timeStart = str_replace('h', ':', $timeStart);
+            $timeEnd = str_replace('h', ':', $timeEnd);
+            return [
+                'opensAt' => isset($this->options['no_locale']) ? (new \DateTime($timeStart))->format('H:i:s') : $formatter->formatHour($timeStart),
+                'closesAt' => isset($this->options['no_locale']) ? (new \DateTime($timeEnd))->format('H:i:s') : $formatter->formatHour($timeEnd)
+            ];
+        }
+
+        return false;
+    }
+
+    /**
      * @param string $times
      * @return mixed
      * @throws \Exception
@@ -82,21 +105,13 @@ class OpeningHours
         $formatter = $this->getFormatter($this->options['locale']);
         $hours = false;
         $times = explode(",", $times);
+
         if (isset($times[0])) {
-            $time = explode("-", $times[0]);
-            $hours['hours'][] =
-                [
-                'opensAt' => isset($this->options['no_locale']) ? (new \DateTime($time[0]))->format('H:i:s') : $formatter->formatHour($time[0]),
-                'closesAt' => isset($this->options['no_locale']) ? (new \DateTime($time[1]))->format('H:i:s') : $formatter->formatHour($time[1])
-            ];
+            $hours['hours'][] = $this->exploderTime($times[0]);
         }
 
         if (isset($times[1])) {
-            $time = explode("-", $times[1]);
-            $hours['hours'][] = [
-                'opensAt' => isset($this->options['no_locale']) ? (new \DateTime($time[0]))->format('H:i:s') : $formatter->formatHour($time[0]),
-                'closesAt' => isset($this->options['no_locale']) ? (new \DateTime($time[1]))->format('H:i:s') : $formatter->formatHour($time[1])
-            ];
+            $hours['hours'][] = $this->exploderTime($times[1]);
         }
 
         return $hours;
