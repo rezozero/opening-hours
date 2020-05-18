@@ -2,7 +2,6 @@
 
 namespace Lib\OpeningHours;
 
-
 /**
  * Interface FormatterInterface
  * @package Lib\OpeningHours

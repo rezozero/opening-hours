@@ -1,7 +1,8 @@
 <?php
 namespace Lib\OpeningHours\Helpers;
 
-class Lang {
+class Lang
+{
 
 
     public static function t($string, $args = array(), $locale = "fr")
@@ -14,20 +15,22 @@ class Lang {
         $translation[$locale] = $message;
 
         // Search for a translated string.
-        if ( isset($translation[$locale][$string]) ) {
+        if (isset($translation[$locale][$string])) {
             $string = $translation[$locale][$string];
         }
 
         // Replace arguments if present.
-        if ( empty($args) ) {
+        if (empty($args)) {
             return $string;
         } else {
-            foreach ( $args as $key => $value ) {
-                switch ( $key[0] ) {
+            foreach ($args as $key => $value) {
+                switch ($key[0]) {
                     case '!':
                     case '@':
                     case '%':
-                    default: $args[$key] = $value; break;
+                    default:
+                        $args[$key] = $value;
+                        break;
                 }
             }
 

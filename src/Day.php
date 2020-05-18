@@ -2,7 +2,6 @@
 
 namespace Lib\OpeningHours;
 
-
 class Day
 {
     const MONDAY = 'Mo';
@@ -31,5 +30,4 @@ class Day
     {
         return in_array($day, static::days());
     }
-
 }

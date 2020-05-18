@@ -3,7 +3,6 @@
 
 namespace Lib\OpeningHours;
 
-
 use Lib\OpeningHours\Helpers\Lang;
 
 class EnglishFormatter

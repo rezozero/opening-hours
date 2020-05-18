@@ -29,7 +29,7 @@ trait DataTrait
         return $this->options;
     }
 
-    protected function setOptions ($options)
+    protected function setOptions($options)
     {
          $this->options = array_merge($this->getDefaultOptions(), $options);
     }

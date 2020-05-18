@@ -69,7 +69,6 @@ class OpeningHours
         } catch (\Exception $e) {
             var_dump($e->getMessage());
         }
-
     }
 
     /**
@@ -77,10 +76,10 @@ class OpeningHours
      * @return array|bool
      * @throws \Exception
      */
-    protected function exploderTime ($times)
+    protected function exploderTime($times)
     {
         $formatter = $this->getFormatter($this->options['locale']);
-        $time = explode("-",$times);
+        $time = explode("-", $times);
         $timeStart = $time[0]??null;
         $timeEnd = $time[1]??null;
         if ($timeStart && $timeEnd) {
@@ -147,7 +146,6 @@ class OpeningHours
 
             $this->closingDay = array_merge($this->closingDay, $tempDay);
         }
-
     }
 
 
@@ -173,8 +171,9 @@ class OpeningHours
         $allDay = Day::days();
         $tempDay = [];
         foreach ($allDay as $day) {
-            if (key_exists($day, $allDayFound))
+            if (key_exists($day, $allDayFound)) {
                 $tempDay[$day] = $allDayFound[$day];
+            }
         }
 
         return $tempDay;
@@ -270,10 +269,10 @@ class OpeningHours
                 foreach ($daysCombined as $key => $dayCombined) {
                     $a = array_search($dayCombined, $allDay);
                     $b = array_search(next($daysCombined), $allDay);
-                    if (is_int($b) && $a == $b - 1 ) {
+                    if (is_int($b) && $a == $b - 1) {
                         //on group
                         $tempDayGrouped[$a] = $dayCombined;
-                    } elseif (is_bool($b) && !$b && isset($daysCombined[$key - 1])){
+                    } elseif (is_bool($b) && !$b && isset($daysCombined[$key - 1])) {
                         $b =array_search($daysCombined[$key - 1], $allDay);
                         if ($b + 1 == $a) {
                             $tempDayGrouped[$a] = $dayCombined;
@@ -329,7 +328,6 @@ class OpeningHours
                 $strintHtml .=
                     '<span class="oh-group"><span class="oh-days">' . $this->normalizeDayName($singleDay) . '</span> <span class="'.$classHour.'">' . $labelHour . '</span></span>'. PHP_EOL;
             }
-
         }
 
         return trim($strintHtml);
