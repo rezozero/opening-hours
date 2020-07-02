@@ -2,7 +2,7 @@
     "name": "rezozero/opening-hours",
     "license": "MIT",
     "type": "library",
-    "description": "Lib for opening hours: return different format opening date from iso format",
+    "description": "Renders business opening-hours in different formats from a ISO formatted string",
     "keywords": [
         "opening-hours"
     ],
