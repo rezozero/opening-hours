@@ -1,0 +1,9 @@
+parameters:
+    excludes_analyse:
+        - */node_modules/*
+        - */bower_components/*
+        - */static/*
+    ignoreErrors:
+        - '#Instantiated class Memcached not found#'
+        - '#Instantiated class Redis not found#'
+    reportUnmatchedIgnoredErrors: false

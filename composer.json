@@ -1,0 +1,33 @@
+{
+    "name": "rezozero/opening-hours",
+    "license": "MIT",
+    "type": "library",
+    "description": "Renders business opening-hours in different formats from a ISO formatted string",
+    "keywords": [
+        "opening-hours"
+    ],
+    "homepage": "https://github.com/rezozero/opening-hours",
+    "authors": [
+        {
+            "name": "Tahina Mananjara",
+            "email": "ratah56@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.0 || ^8.0",
+        "twig/twig": "1.* || 2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "RZ\\OpeningHours\\": "src/"
+        }
+    },
+    "require-dev": {
+        "satooshi/php-coveralls": "^2.0",
+        "squizlabs/php_codesniffer": "^3.3",
+        "friendsofphp/php-cs-fixer": "^2.13",
+        "phpstan/phpstan": "^0.11.19",
+        "atoum/atoum": "^3.4"
+    }
+}
