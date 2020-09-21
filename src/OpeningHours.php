@@ -72,16 +72,16 @@ class OpeningHours
     }
 
     /**
-     * @param array $times
+     * @param string $times
      * @return array|bool
      * @throws \Exception
      */
-    protected function exploderTime($times)
+    protected function exploderTime(string $times)
     {
         $formatter = $this->getFormatter($this->options['locale']);
         $time = explode("-", $times);
-        $timeStart = $time[0]??null;
-        $timeEnd = $time[1]??null;
+        $timeStart = $time[0] ?? null;
+        $timeEnd = $time[1] ?? null;
         if ($timeStart && $timeEnd) {
             if (! preg_match('/^(([0-1][0-9]|2[0-3]):[0-5][0-9]|24:00)$/', $timeStart)) {
                 throw InvalidTimeString::invalidTime($timeStart);
@@ -105,9 +105,8 @@ class OpeningHours
      * @return mixed
      * @throws \Exception
      */
-    private function parseTimes($times)
+    private function parseTimes(string $times)
     {
-        $formatter = $this->getFormatter($this->options['locale']);
         $hours = false;
         $times = explode(",", $times);
 
@@ -123,18 +122,20 @@ class OpeningHours
     }
 
     /**
-     * @param string $days
-     * @param string $times
+     * @param string|null $days
+     * @param string|null $times
      * @throws \Exception
      */
-    protected function associateDayHours($days, $times)
+    protected function associateDayHours(string $days = null, string $times = null)
     {
         $timesParser = false;
-        if ($days) {
+        if (null !== $days && $days !== '') {
             $days = explode(",", $days);
+        } else {
+            $days = [];
         }
 
-        if ($times) {
+        if (null !== $times && $times !== '') {
             $timesParser = $this->parseTimes($times);
         }
         $tempDay = [];
@@ -284,9 +285,9 @@ class OpeningHours
                     if (is_int($b) && $a == $b - 1) {
                         //on group
                         $tempDayGrouped[$a] = $dayCombined;
-                    } elseif (is_bool($b) && !$b && isset($daysCombined[$key - 1])) {
-                        $b =array_search($daysCombined[$key - 1], $allDay);
-                        if ($b + 1 == $a) {
+                    } elseif (is_bool($b) && false === $b && isset($daysCombined[$key - 1])) {
+                        $b = array_search($daysCombined[$key - 1], $allDay);
+                        if (is_int($b) && $b + 1 == $a) {
                             $tempDayGrouped[$a] = $dayCombined;
                         } else {
                             $tempDayNoGrouped[$a] = $dayCombined;
@@ -312,6 +313,7 @@ class OpeningHours
             foreach ($combinedDaysReordering as $combinedDays) {
                 foreach ($combinedDays as $labelHour => $daysCombined) {
                     $labelDay = "";
+                    /** @var string $day */
                     foreach ($daysCombined as $day) {
                         $labelDay .= $this->normalizeDayName($day) . ", ";
                     }
@@ -326,6 +328,10 @@ class OpeningHours
         }
 
         if (!empty($allDayFound)) {
+            /**
+             * @var string $singleDay
+             * @var array $dataHours
+             */
             foreach ($allDayFound as $singleDay => $dataHours) {
                 $labelHour = $labelClose;
                 $classHour = 'oh-status';
