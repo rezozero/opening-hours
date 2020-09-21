@@ -50,25 +50,21 @@ class OpeningHours
     }
 
     /**
-     *
+     * @return void
      */
     protected function buildData()
     {
-        try {
-            if (!is_array($this->getData())) {
-                throw new \Exception("OpeningHours data must be an array", 1);
-            }
-
-            foreach ($this->getData() as $openingHourData) {
-                $openingHourData = explode(" ", $openingHourData);
-                $days = $openingHourData[0] ?? "";
-                $times = $openingHourData[1] ?? "";
-                $this->associateDayHours($days, $times);
-            }
-            $this->findDayNotGiven();
-        } catch (\Exception $e) {
-            var_dump($e->getMessage());
+        if (!is_array($this->getData())) {
+            throw new \Exception("OpeningHours data must be an array", 1);
         }
+
+        foreach ($this->getData() as $openingHourData) {
+            $openingHourData = explode(" ", $openingHourData);
+            $days = $openingHourData[0] ?? "";
+            $times = $openingHourData[1] ?? "";
+            $this->associateDayHours($days, $times);
+        }
+        $this->findDayNotGiven();
     }
 
     /**
@@ -125,6 +121,7 @@ class OpeningHours
      * @param string|null $days
      * @param string|null $times
      * @throws \Exception
+     * @return void
      */
     protected function associateDayHours(string $days = null, string $times = null)
     {
@@ -161,7 +158,9 @@ class OpeningHours
         }
     }
 
-
+    /**
+     * @return void
+     */
     protected function findDayNotGiven()
     {
         $allDayFound = array_merge($this->openingDay, $this->closingDay);

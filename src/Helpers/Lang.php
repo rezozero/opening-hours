@@ -3,9 +3,13 @@ namespace RZ\OpeningHours\Helpers;
 
 class Lang
 {
-
-
-    public static function t($string, $args = array(), $locale = "fr")
+    /**
+     * @param string $string
+     * @param array $args
+     * @param string $locale
+     * @return mixed|string
+     */
+    public static function t($string, $args = [], $locale = "fr")
     {
         global $translation;
         $message = null;
@@ -23,6 +27,10 @@ class Lang
         if (empty($args)) {
             return $string;
         } else {
+            /**
+             * @var string $key
+             * @var mixed $value
+             */
             foreach ($args as $key => $value) {
                 switch ($key[0]) {
                     case '!':

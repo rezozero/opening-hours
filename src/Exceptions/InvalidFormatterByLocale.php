@@ -12,9 +12,9 @@ class InvalidFormatterByLocale extends Exception
 {
     /**
      * @param string $locale
-     * @return static
+     * @return InvalidFormatterByLocale
      */
-    public static function invalidFormatter(string $locale): self
+    public static function invalidFormatter(string $locale): InvalidFormatterByLocale
     {
         return new self("No formatter was found for locale: $locale");
     }
