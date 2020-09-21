@@ -13,9 +13,9 @@ class InvalidDayName extends Exception
 {
     /**
      * @param string $name
-     * @return static
+     * @return InvalidDayName
      */
-    public static function invalidDayName(string $name): self
+    public static function invalidDayName(string $name): InvalidDayName
     {
         return new self("Day `{$name}` isn't a valid day. Valid day are english words, e.g. ".implode(", ", Day::days()));
     }
