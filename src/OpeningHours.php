@@ -39,7 +39,6 @@ class OpeningHours
         'combinedDays' => false,
     ];
 
-
     /**
      * OpeningHours constructor.
      * @param array $data
@@ -51,6 +50,7 @@ class OpeningHours
 
     /**
      * @return void
+     * @throws \Exception
      */
     protected function buildData()
     {
@@ -193,6 +193,7 @@ class OpeningHours
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getClosedDaysAsArray(): array
     {
@@ -218,6 +219,7 @@ class OpeningHours
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function getAllDaysAsArray(): array
     {
@@ -251,7 +253,7 @@ class OpeningHours
     protected function transformDaysAsHtml(array $allDayFound): string
     {
         $formatter = $this->getFormatter($this->options['locale']);
-        $strintHtml = "";
+        $stringHtml = "";
         $labelClose = $formatter->formatText('closed', $this->options);
         if ($this->options['combinedDays']) {
             $combinedDays = [];
@@ -317,13 +319,13 @@ class OpeningHours
                         $labelDay .= $this->normalizeDayName($day) . ", ";
                     }
                     $labelDay = substr(trim($labelDay), 0, -1);
-                    $strintHtml .=
+                    $stringHtml .=
                         '<span class="oh-group"><span class="oh-days">' . $labelDay . '</span> <span class="'.$combinedDaysClass[$labelHour].'">' . $labelHour . '</span></span>'.PHP_EOL;
                 }
             }
 
 
-            return trim($strintHtml);
+            return trim($stringHtml);
         }
 
         if (!empty($allDayFound)) {
@@ -342,12 +344,12 @@ class OpeningHours
                     $labelHour = substr(trim($labelHour), 0, -1);
                     $classHour = 'oh-hours';
                 }
-                $strintHtml .=
+                $stringHtml .=
                     '<span class="oh-group"><span class="oh-days">' . $this->normalizeDayName($singleDay) . '</span> <span class="'.$classHour.'">' . $labelHour . '</span></span>'. PHP_EOL;
             }
         }
 
-        return trim($strintHtml);
+        return trim($stringHtml);
     }
 
     /**
