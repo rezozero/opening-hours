@@ -3,6 +3,7 @@
 namespace RZ\OpeningHours\Helpers;
 
 use RZ\OpeningHours\Exceptions\InvalidFormatterByLocale;
+use RZ\OpeningHours\FormatterInterface;
 
 trait DataTrait
 {
@@ -39,7 +40,7 @@ trait DataTrait
      * @param array $options
      * @return self
      */
-    protected function setOptions($options)
+    protected function setOptions(array $options)
     {
         $this->options = array_merge($this->getDefaultOptions(), $options);
         return $this;
@@ -47,10 +48,10 @@ trait DataTrait
 
     /**
      * @param string $locale
-     * @return mixed
+     * @return FormatterInterface
      * @throws InvalidFormatterByLocale
      */
-    protected function getFormatter(string $locale)
+    protected function getFormatter(string $locale): FormatterInterface
     {
         if (isset(static::$formatters[$locale])) {
             $formatterClass = static::$formatters[$locale];

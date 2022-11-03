@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "php": "^7.0 || ^8.0",
+        "php": "^7.4 || ^8.0 || ^8.1",
         "twig/twig": "1.* || 2.* || 3.*"
     },
     "autoload": {
@@ -29,9 +29,9 @@
         }
     },
     "require-dev": {
-        "satooshi/php-coveralls": "^2.0",
-        "phpstan/phpstan": "^0.12.43",
-        "squizlabs/php_codesniffer": "^3.5",
-        "atoum/atoum": "^3.4"
+        "satooshi/php-coveralls": "*",
+        "phpstan/phpstan": "*",
+        "squizlabs/php_codesniffer": "*",
+        "atoum/atoum": "*"
     }
 }

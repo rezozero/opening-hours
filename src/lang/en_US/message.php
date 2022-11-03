@@ -1,6 +1,7 @@
 <?php
 return [
     'Hello %name' => 'Hello %name',
+    'every_days' => 'Every days',
     'mo' => 'Monday',
     'tu' => 'Tuesday',
     'we' => 'wednesday',
