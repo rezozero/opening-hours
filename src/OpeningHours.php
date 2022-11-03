@@ -7,15 +7,14 @@ use RZ\OpeningHours\Exceptions\InvalidTimeString;
 use RZ\OpeningHours\Helpers\DataTrait;
 
 /**
- * Class OpeningHours
  * @package RZ\OpeningHours
  */
 class OpeningHours
 {
     /**
-     * @var array
+     * @var array<string, class-string<FormatterInterface>>
      */
-    public static $formatters = [
+    public static array $formatters = [
         'fr' => FrenchFormatter::class,
         'en' => EnglishFormatter::class,
     ];
@@ -40,10 +39,9 @@ class OpeningHours
     ];
 
     /**
-     * OpeningHours constructor.
      * @param array $data
      */
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data;
     }
@@ -59,6 +57,9 @@ class OpeningHours
         }
 
         foreach ($this->getData() as $openingHourData) {
+            if (!is_string($openingHourData)) {
+                throw new \Exception("Single OpeningHours row data must be a string", 1);
+            }
             $openingHourData = explode(" ", $openingHourData);
             $days = $openingHourData[0] ?? "";
             $times = $openingHourData[1] ?? "";
@@ -98,12 +99,14 @@ class OpeningHours
 
     /**
      * @param string $times
-     * @return mixed
+     * @return array
      * @throws \Exception
      */
-    private function parseTimes(string $times)
+    private function parseTimes(string $times): array
     {
-        $hours = false;
+        $hours = [
+            'hours' => []
+        ];
         $times = explode(",", $times);
 
         if (isset($times[0])) {
@@ -142,8 +145,7 @@ class OpeningHours
                 if (!Day::isValid($day)) {
                     throw InvalidDayName::invalidDayName($day);
                 }
-                $tempDay[$day] = ['hours' => $timesParser['hours']
-                ];
+                $tempDay[$day] = ['hours' => $timesParser['hours']];
             }
             $this->openingDay = array_merge($this->openingDay, $tempDay);
         } else {
@@ -261,7 +263,7 @@ class OpeningHours
             foreach ($allDayFound as $singleDayToCombine => $dataHoursToCombine) {
                 //search all day for same hour
                 $labelHour = $labelClose;
-                if (null !== $dataHoursToCombine && !empty($dataHoursToCombine)) {
+                if (!empty($dataHoursToCombine)) {
                     $labelHour = "";
                     foreach ($dataHoursToCombine['hours'] as $hour) {
                         $labelHour .= $hour['opensAt'] . " - " . $hour['closesAt'] . ", ";
@@ -314,11 +316,18 @@ class OpeningHours
             foreach ($combinedDaysReordering as $combinedDays) {
                 foreach ($combinedDays as $labelHour => $daysCombined) {
                     $labelDay = "";
-                    /** @var string $day */
-                    foreach ($daysCombined as $day) {
-                        $labelDay .= $this->normalizeDayName($day) . ", ";
+                    if (count($daysCombined) === 7) {
+                        /*
+                         * Do not display all 7 days names, just every_days
+                         */
+                        $labelDay = $this->getFormatter($this->options['locale'])->formatDay('every_days', $this->options);
+                    } else {
+                        /** @var string $day */
+                        foreach ($daysCombined as $day) {
+                            $labelDay .= $this->normalizeDayName($day) . ", ";
+                        }
+                        $labelDay = substr(trim($labelDay), 0, -1);
                     }
-                    $labelDay = substr(trim($labelDay), 0, -1);
                     $stringHtml .=
                         '<span class="oh-group"><span class="oh-days">' . $labelDay . '</span> <span class="'.$combinedDaysClass[$labelHour].'">' . $labelHour . '</span></span>'.PHP_EOL;
                 }
@@ -336,7 +345,7 @@ class OpeningHours
             foreach ($allDayFound as $singleDay => $dataHours) {
                 $labelHour = $labelClose;
                 $classHour = 'oh-status';
-                if (null !== $dataHours && !empty($dataHours)) {
+                if (!empty($dataHours)) {
                     $labelHour = "";
                     foreach ($dataHours['hours'] as $hour) {
                         $labelHour .= $hour['opensAt'] . " - " . $hour['closesAt'] . ", ";
@@ -354,10 +363,10 @@ class OpeningHours
 
     /**
      * @param string $day
-     * @return mixed
+     * @return string
      * @throws \Exception
      */
-    protected function normalizeDayName($day)
+    protected function normalizeDayName(string $day): string
     {
         $formatter = $this->getFormatter($this->options['locale']);
         if (!Day::isValid($day)) {
@@ -371,16 +380,12 @@ class OpeningHours
      * @param \DateTime $date
      * @return bool
      */
-    public function isOpenedAt(\DateTime $date)
+    public function isOpenedAt(\DateTime $date): bool
     {
         return $this->dataOpeningOneDay($date);
     }
 
-    /**
-     * @param \DateTime $date
-     * @return bool
-     */
-    protected function dataOpeningOneDay(\DateTime $date)
+    protected function dataOpeningOneDay(\DateTime $date): bool
     {
         $allDay = $this->getAllDaysAsArray();
         $day = $date->format('D');

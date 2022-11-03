@@ -7,9 +7,9 @@ class Lang
      * @param string $string
      * @param array $args
      * @param string $locale
-     * @return mixed|string
+     * @return string
      */
-    public static function t($string, $args = [], $locale = "fr")
+    public static function t(string $string, array $args = [], string $locale = "fr"): string
     {
         global $translation;
         $message = null;

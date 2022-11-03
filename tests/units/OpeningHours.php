@@ -208,6 +208,56 @@ EOT
     /**
      * @throws \Exception
      */
+    public function testGetEveryDaysAsHtmlAndCombined()
+    {
+        $this
+            // creation of a new instance of the class to test OpeningHours
+            ->given($openingHours = new BaseOpeningHours([
+                // Monday is closed and not mentioned
+                'Mo,Tu,We,Th,Fr,Sa,Su 12:00-19:00',
+            ]))
+            ->object($openingHours)
+            ->isInstanceOf(BaseOpeningHours::class)
+            ->string($openingHours->getAllDaysAsHtml([
+                'combinedDays' => true,
+                'capitalize' => false,
+                'locale' => 'fr'
+            ]))
+            ->isNotEmpty()
+            // Monday is closed like friday and saturday, but some days are opened between them
+            // so we split them even if combinedDays is set to TRUE
+            ->isEqualTo(trim(<<<EOT
+<span class="oh-group"><span class="oh-days">tous les jours</span> <span class="oh-hours">12h - 19h</span></span>
+EOT
+            ))
+            // --- capitalize option
+            ->string($openingHours->getAllDaysAsHtml([
+                'combinedDays' => true,
+                'capitalize' => true,
+                'locale' => 'fr'
+            ]))
+            ->isNotEmpty()
+            ->isEqualTo(trim(<<<EOT
+<span class="oh-group"><span class="oh-days">Tous les jours</span> <span class="oh-hours">12h - 19h</span></span>
+EOT
+            ))
+            // --- capitalize option
+            ->string($openingHours->getAllDaysAsHtml([
+                'combinedDays' => true,
+                'capitalize' => true,
+                'locale' => 'en'
+            ]))
+            ->isNotEmpty()
+            ->isEqualTo(trim(<<<EOT
+<span class="oh-group"><span class="oh-days">Every days</span> <span class="oh-hours">12PM - 7PM</span></span>
+EOT
+            ))
+        ;
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testGetClosedDaysAsArray()
     {
         $this
