@@ -5,7 +5,7 @@ namespace RZ\OpeningHours;
 
 use RZ\OpeningHours\Helpers\Lang;
 
-class EnglishFormatter
+class EnglishFormatter implements FormatterInterface
 {
     /**
      * @inheritDoc
@@ -19,7 +19,7 @@ class EnglishFormatter
      * @param string $hour
      * @return string
      */
-    public function formatHour($hour) : string
+    public function formatHour(string $hour) : string
     {
         $format = "g:iA";
         if ("00" ==  substr(trim($hour), -2)) {
@@ -34,11 +34,11 @@ class EnglishFormatter
      * @param array $options
      * @return string
      */
-    public function formatDay($day, $options = []) : string
+    public function formatDay(string $day, array $options = []) : string
     {
         $day = Lang::t(mb_strtolower($day), [], $this->getLocale());
 
-        return  ucfirst($day);
+        return ucfirst($day);
     }
 
     /**
@@ -46,7 +46,7 @@ class EnglishFormatter
      * @param array $options
      * @return string
      */
-    public function formatText($text, $options = []) : string
+    public function formatText(string $text, array $options = []) : string
     {
         $text = Lang::t($text, [], $this->getLocale());
 
